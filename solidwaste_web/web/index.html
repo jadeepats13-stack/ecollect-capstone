@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ECollect: solid waste collection scheduling, fleet monitoring and resident feedback for Barangay Poblacion, Iligan City.">
+  <meta name="theme-color" content="#2E7D32">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="icon" type="image/svg+xml" href="/images/ecollect-mark.svg">
+  <title>ECollect | Barangay Poblacion Waste Collection</title>
+  <script>
+    // Apply the saved theme before the page paints (no flash).
+    try { document.documentElement.setAttribute('data-theme', localStorage.getItem('ecollect-theme') || 'light'); } catch (e) {}
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

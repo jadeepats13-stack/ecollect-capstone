@@ -1,0 +1,74 @@
+{
+  "expo": {
+    "name": "ECollect",
+    "slug": "ecollect",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ph.ecollect.poblacion"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1f6b4a",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "ph.ecollect.poblacion",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION"
+      ],
+      "googleServicesFile": "./google-services.json"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true,
+          "isIosBackgroundLocationEnabled": true,
+          "locationWhenInUsePermission": "ECollect uses your location to show the garbage truck on the map for residents and the barangay.",
+          "locationAlwaysAndWhenInUsePermission": "ECollect keeps sharing the garbage truck's location while you collect, even when the phone is locked. It stops after the day's collection."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1f6b4a",
+          "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "ECollect lets you attach a photo to a report for the barangay.",
+          "cameraPermission": "ECollect uses the camera to take a photo for your report to the barangay.",
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "27775e83-e25e-40e6-8d3d-daf5c36c6f50"
+      }
+    },
+    "owner": "jadee55"
+  }
+}

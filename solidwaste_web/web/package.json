@@ -1,0 +1,25 @@
+{
+  "name": "ecollect-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "ECollect admin website (LGU Admin + Barangay Admin) on React + Supabase",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "chart.js": "4.4.4",
+    "leaflet": "1.9.4",
+    "qrcode": "1.5.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.28.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.3.4",
+    "vite": "5.4.11"
+  }
+}

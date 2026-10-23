@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "732184386266",
+    "project_id": "capstone-ecollect",
+    "storage_bucket": "capstone-ecollect.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732184386266:android:b1e3df5d8ca5ddecef63e3",
+        "android_client_info": {
+          "package_name": "ph.ecollect.poblacion"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAf9AAh14VSsX7Jl2wnaXHzQCWhDJlAF2E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
