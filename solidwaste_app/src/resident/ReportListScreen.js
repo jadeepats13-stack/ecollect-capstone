@@ -1,10 +1,10 @@
-// Resident app, Report: my reports with their progress (sent → seen → resolved), filters, and a New report button.
+// Resident app, Report: my reports with their progress (sent → seen → resolved), filters, and the New button at the top right.
 import React, { useState } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { canRateReport, getReports } from '../data/resident';
 import { useApi } from '../hooks';
-import { Button, Card, FilterChips, Screen, StateView } from '../components/ui';
+import { Card, FilterChips, Screen, StateView } from '../components/ui';
 import { colors, radius, shadow, type } from '../theme';
 import { Header, IconCircle } from '../collector/parts';
 import { STAGE, StageBar, TYPE_ICONS } from './ReportParts';
@@ -93,7 +93,6 @@ export default function ReportListScreen({ navigation }) {
           options={[['all', 'All', groups.all.length], ['open', 'Open', groups.open.length], ['done', 'Resolved', groups.done.length], ['rate', 'To rate', groups.rate.length]]} />
       ) : null}
       <StateView loading={loading} error={error} onRetry={reload} empty={data && shown.length === 0} emptyTitle={EMPTY[0]} emptyText={EMPTY[1]} />
-      {data && list.length === 0 ? <Button title="New report" icon="add-circle-outline" onPress={goNew} /> : null}
       {shown.map((r) => <ReportCard key={r.feedback_report_id} r={r} onPress={() => navigation.navigate('ReportDetail', { id: r.feedback_report_id })} />)}
     </Screen>
   );

@@ -31,7 +31,7 @@ export default function ReportNewScreen({ navigation }) {
   const [kind, setKind] = useState(null);
   const [text, setText] = useState('');
   const [photo, setPhoto] = useState(null);
-  const [place, setPlace] = useState(null);       // { latitude, longitude, accuracy }
+  const [place, setPlace] = useState(null); 
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
