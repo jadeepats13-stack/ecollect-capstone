@@ -656,3 +656,8 @@ dialog.modal .pick-map { margin-top: 8px !important; height: 260px !important; m
 .route-dot.first { background: #1f6b4a; }
 .route-dot.last { outline: 3px solid rgba(31, 107, 74, .35); }
 @media (max-width: 640px) { .route-map { height: 320px; min-height: 320px; } }
+/* Barangay maps: map credits folded into a small "i" button (bottom right) */
+.credit-compact .leaflet-control-attribution { display: none; }
+.credit-compact.show-credit .leaflet-control-attribution { display: block; margin-right: 34px !important; }
+.map-credit-btn { position: absolute; right: 8px; bottom: 8px; z-index: 1000; width: 22px; height: 22px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .85); color: #14231d; font: 700 12px/22px Georgia, serif; font-style: italic; cursor: pointer; box-shadow: 0 1px 3px rgba(0, 0, 0, .35); padding: 0; }
+.map-credit-btn:hover, .show-credit .map-credit-btn { background: #fff; }

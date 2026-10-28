@@ -10,7 +10,7 @@ import { loadOps, pathToText } from '../lib/ops';
 import { supabase, must } from '../lib/supabase';
 import { DAYS } from '../lib/time';
 import { FIXED_ZONE_COUNT } from '../config';
-import { createMap, loadBoundary } from '../lib/mapEngine';
+import { createMap, loadBoundary, mapLook } from '../lib/mapEngine';
 import { esc } from '../lib/ui';
 
 const badge = (color) => ({ display: 'inline-grid', width: 22, height: 22, fontSize: 11, verticalAlign: -5, marginRight: 6, background: color });
@@ -63,6 +63,7 @@ const fmtPoint = ([a, b]) => `${a.toFixed(6)},${b.toFixed(6)}`;
 
 /** Click-to-draw route map: each click adds the next point in driving order. */
 function RouteDrawMap({ zone, zones, points, onAdd }) {
+  const look = mapLook(usePanel()?.role);
   const box = useRef(null);
   const eng = useRef(null);
   const line = useRef(null);
@@ -71,7 +72,7 @@ function RouteDrawMap({ zone, zones, points, onAdd }) {
   useEffect(() => { add.current = onAdd; });
   useEffect(() => {
     let alive = true, e = null, ro = null;
-    createMap(box.current, { scrollZoom: true, alive: () => alive }).then(async (m) => {
+    createMap(box.current, { ...look, scrollZoom: true, alive: () => alive }).then(async (m) => {
       if (!m) return;
       if (!alive) { m.destroy(); return; }
       e = m; eng.current = m;
@@ -86,7 +87,7 @@ function RouteDrawMap({ zone, zones, points, onAdd }) {
       m.onClick((a, b) => add.current([Number(Number(a).toFixed(6)), Number(Number(b).toFixed(6))]));
       ro = new ResizeObserver(() => m.resize()); ro.observe(box.current);
       try {
-        const bd = await loadBoundary();
+        const bd = await loadBoundary(look.boundaryUrl);
         if (alive) m.focusPoblacion(bd.extent, bd.pob, { fit: true });
       } catch { /* the map still works without the outline */ }
       if (alive && zone.boundary.length > 2) m.fit(zone.boundary, 30);

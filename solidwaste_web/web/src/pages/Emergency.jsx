@@ -9,13 +9,14 @@ import { EMERGENCY_STATUSES, loadOps } from '../lib/ops';
 import { supabase } from '../lib/supabase';
 import { addDays, fmtDate, fmtStamp } from '../lib/time';
 import { esc, toast } from '../lib/ui';
-import { createMap, loadBoundary } from '../lib/mapEngine';
+import { createMap, loadBoundary, mapLook } from '../lib/mapEngine';
 
 const isClosed = (status) => status === 'Completed' || status === 'Cancelled';
 const statusCss = (status, overdue) => (overdue ? 'delayed' : ({ Scheduled: 'pending', 'In progress': 'ongoing', Completed: 'done', Cancelled: '' }[status] ?? ''));
 
 /** Click-to-place map, limited to Barangay Poblacion (Google Maps or the street map). */
 function PickMap({ lat, lng, onPick, zones }) {
+  const look = mapLook(usePanel()?.role);
   const box = useRef(null);
   const eng = useRef(null);
   const pin = useRef(null);
@@ -25,7 +26,7 @@ function PickMap({ lat, lng, onPick, zones }) {
   useEffect(() => { pick.current = onPick; });
   useEffect(() => {
     let alive = true, e = null, ro = null;
-    createMap(box.current, { scrollZoom: false, alive: () => alive }).then(async (m) => {
+    createMap(box.current, { ...look, scrollZoom: false, alive: () => alive }).then(async (m) => {
       if (!m) return;
       if (!alive) { m.destroy(); return; }
       e = m; eng.current = m;
@@ -37,7 +38,7 @@ function PickMap({ lat, lng, onPick, zones }) {
       m.onClick((a, b) => pick.current(a.toFixed(6), b.toFixed(6)));
       ro = new ResizeObserver(() => m.resize()); ro.observe(box.current);
       try {
-        const bd = await loadBoundary();
+        const bd = await loadBoundary(look.boundaryUrl);
         if (alive) m.focusPoblacion(bd.extent, bd.pob, { fit: true });
       } catch { /* the map still works without the outline */ }
       if (alive) setReady(true);

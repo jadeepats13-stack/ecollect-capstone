@@ -17,6 +17,18 @@ import { color } from './ui';
 
 export const GOOGLE_KEY = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '').trim();
 
+/**
+ * How the maps look for each role. Barangay Admin: satellite only (no Satellite/Street switch), no +/- buttons
+ * (scroll, pinch or double-click to zoom), the map credits folded into a small "i", the boundary the barangay
+ * traced, and no on/off switch for that boundary. Other roles keep the default look.
+ */
+const BARANGAY_LOOK = {
+  satelliteOnly: true, zoomButtons: false, compactCredit: true, boundaryToggle: false,
+  boundaryUrl: '/data/poblacion_boundary_traced.geojson', credit: 'Boundary: Barangay Poblacion (traced 2026)',
+};
+const DEFAULT_LOOK = Object.freeze({});
+export const mapLook = (role) => (role === 'barangay' ? BARANGAY_LOOK : DEFAULT_LOOK);
+
 // ---------- Google Maps loader ----------
 let googlePromise = null;
 // If Google refused the key in the last 10 minutes, go straight to the street map (then try Google again).
@@ -72,6 +84,23 @@ const ringBounds = (ring) => {
 const padBounds = (b, f) => { const dl = (b.n - b.s) * f, dn = (b.e - b.w) * f; return { s: b.s - dl, n: b.n + dl, w: b.w - dn, e: b.e + dn }; };
 const signedArea = (ring) => { let a = 0; for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) a += (ring[j][1] - ring[i][1]) * (ring[j][0] + ring[i][0]); return a; };
 
+/** Map credits folded into a small "i" (the imagery and map-data credits must stay available). */
+function creditButton(canvas) {
+  canvas.classList.add('credit-compact');
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'map-credit-btn';
+  b.setAttribute('aria-label', 'Map credits');
+  b.setAttribute('aria-expanded', 'false');
+  b.textContent = 'i';
+  b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const on = canvas.classList.toggle('show-credit');
+    b.setAttribute('aria-expanded', on ? 'true' : 'false');
+  });
+  canvas.appendChild(b);
+}
+
 /** Satellite button drawn over the map (both engines). */
 function satelliteButton(canvas, onToggle) {
   const b = document.createElement('button');
@@ -123,7 +152,7 @@ function googleEngine(g, canvas, opts) {
   canvas.appendChild(host);
   const map = new g.Map(host, {
     center: { lat: 8.229, lng: 124.2365 }, zoom: 16, mapTypeId: 'roadmap', styles: NO_PLACES, clickableIcons: false,
-    disableDefaultUI: true, zoomControl: true, fullscreenControl: false, streetViewControl: false, mapTypeControl: false,
+    disableDefaultUI: true, zoomControl: opts.zoomButtons !== false, fullscreenControl: false, streetViewControl: false, mapTypeControl: false,
     rotateControl: false, tilt: 0, isFractionalZoomEnabled: true,
     gestureHandling: opts.scrollZoom ? 'greedy' : 'cooperative', keyboardShortcuts: true,
   });
@@ -232,19 +261,20 @@ function googleEngine(g, canvas, opts) {
     destroy() { listeners.forEach((l) => l.remove()); groups.forEach((gr) => gr.clear()); maskPoly?.setMap(null); borderLine?.setMap(null); info.close(); host.remove(); canvas.querySelectorAll('.map-sat-btn').forEach((b) => b.remove()); },
   };
   listeners.push(map.addListener('click', (e) => { info.close(); clicks.forEach((f) => f(e.latLng.lat(), e.latLng.lng())); }));
-  if (opts.satelliteButton !== false) satelliteButton(canvas, (on) => eng.setSatellite(on));
+  if (opts.satelliteOnly) eng.setSatellite(true);
+  else if (opts.satelliteButton !== false) satelliteButton(canvas, (on) => eng.setSatellite(on));
   return eng;
 }
 
 // ================= Leaflet (fallback) =================
 function leafletEngine(canvas, opts) {
-  const map = L.map(canvas, { zoomControl: true, zoomSnap: 0.25, scrollWheelZoom: !!opts.scrollZoom, attributionControl: true }).setView([8.229, 124.2365], 16);
+  const map = L.map(canvas, { zoomControl: opts.zoomButtons !== false, zoomSnap: 0.25, scrollWheelZoom: !!opts.scrollZoom, attributionControl: true }).setView([8.229, 124.2365], 16);
   if (!opts.scrollZoom) {
     canvas.addEventListener('wheel', (e) => {
       if (e.ctrlKey || e.metaKey) { e.preventDefault(); map.scrollWheelZoom.enable(); } else map.scrollWheelZoom.disable();
     }, { passive: false });
   }
-  const credit = ' | Boundary: PSA/NAMRIA 2023';
+  const credit = ` | ${opts.credit || 'Boundary: PSA/NAMRIA 2023'}`;
   let tiles = null, usingFallback = false, tileErrors = 0, tileLoads = 0, satellite = false;
   const msg = document.createElement('div');
   msg.className = 'map-msg'; msg.hidden = true; canvas.appendChild(msg);
@@ -336,9 +366,11 @@ function leafletEngine(canvas, opts) {
     resize() { map.invalidateSize(); },
     closePopup() { map.closePopup(); },
     showMsg,
-    destroy() { map.remove(); canvas.querySelectorAll('.map-sat-btn, .map-msg').forEach((b) => b.remove()); },
+    destroy() { map.remove(); canvas.classList.remove('credit-compact', 'show-credit'); canvas.querySelectorAll('.map-sat-btn, .map-msg, .map-credit-btn').forEach((b) => b.remove()); },
   };
-  if (opts.satelliteButton !== false) satelliteButton(canvas, (on) => eng.setSatellite(on));
+  if (opts.satelliteOnly) eng.setSatellite(true);
+  else if (opts.satelliteButton !== false) satelliteButton(canvas, (on) => eng.setSatellite(on));
+  if (opts.compactCredit) creditButton(canvas);
   return eng;
 }
 

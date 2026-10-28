@@ -60,7 +60,7 @@ export function mountZoneMap(opts) {
                 '<option value="pending">Pending / upcoming</option><option value="completed">Completed</option><option value="none">No collection that day</option></select></div>' +
         '</div>' +
         '<div class="map-side-section"><h3>Layers</h3><div class="layer-toggles">' +
-            toggle('boundary', 'Barangay boundary', '<span class="layer-swatch" style="border:2px solid #14231d;background:transparent"></span>') +
+            (opts.boundaryToggle === false ? '' : toggle('boundary', 'Barangay boundary', '<span class="layer-swatch" style="border:2px solid #14231d;background:transparent"></span>')) +
             toggle('zones', 'Zone areas', '<span class="layer-swatch" style="background:#0f766e55;border:1px solid #0f766e"></span>') +
             toggle('points', 'Truck stops (fixed schedule)', '<span class="layer-swatch" style="width:12px;border-radius:3px;background:#14231d"></span>') +
             toggle('emergencies', 'Emergency collections', '<span class="layer-swatch" style="width:12px;border-radius:50%;background:#fff;border:3px solid #c2412d"></span>') +
@@ -98,7 +98,7 @@ export function mountZoneMap(opts) {
     }
 
     /* ---------- Map: Poblacion only ---------- */
-    const ready = createMap(opts.canvas, { scrollZoom: !!opts.scrollZoom, alive: function () { return alive; } }).then(async function (e) {
+    const ready = createMap(opts.canvas, Object.assign({}, opts.mapOptions || {}, { scrollZoom: !!opts.scrollZoom, alive: function () { return alive; } })).then(async function (e) {
         if (!e) return;
         if (!alive) { e.destroy(); return; }
         eng = e;

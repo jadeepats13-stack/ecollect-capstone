@@ -2,6 +2,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { mountZoneMap } from '../lib/zoneMap';
 import { loadMap } from '../lib/ops';
+import { mapLook } from '../lib/mapEngine';
 import { usePanel } from './Layout';
 
 const ZoneMapPanel = forwardRef(function ZoneMapPanel({ title, desc, full = false, showFeedback = false, actions = null, live = true }, ref) {
@@ -11,10 +12,12 @@ const ZoneMapPanel = forwardRef(function ZoneMapPanel({ title, desc, full = fals
   const panel = usePanel();
 
   useEffect(() => {
+    const look = mapLook(panel?.role);
     api.current = mountZoneMap({
       canvas: canvas.current, side: side.current,
       load: (date) => loadMap(date),
-      boundaryUrl: '/data/poblacion_boundary.geojson',
+      boundaryUrl: look.boundaryUrl ?? '/data/poblacion_boundary.geojson',
+      mapOptions: look, boundaryToggle: look.boundaryToggle,
       // The Live map refreshes every 10 s (trucks glide between readings).
       pollMs: full ? 10000 : 15000, dateFilter: true, scrollZoom: full, showFeedback,
       onStatus: live ? (s) => panel?.setLive(s) : undefined,

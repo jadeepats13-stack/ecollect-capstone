@@ -2,7 +2,7 @@
 // (the resident sees both in the app and is notified). LGU Admin: views everything, including the history.
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { createMap, loadBoundary } from '../lib/mapEngine';
+import { createMap, loadBoundary, mapLook } from '../lib/mapEngine';
 import { matchesSearch, NoMatchRow, SearchBar, useSearchText, Empty, LoadError, Loading, Messages, PageHead, ReadonlyBanner, useLoad } from '../components/common';
 import { usePanel } from '../components/Layout';
 import { loadOps, rangeFrom } from '../lib/ops';
@@ -19,20 +19,21 @@ const chipCss = (r) => (r.open ? (r.status === 'In Progress' ? 'ongoing' : 'pend
 
 /** Small map with the report's pin (only when the resident shared a location). */
 function PinMap({ lat, lng }) {
+  const look = mapLook(usePanel()?.role);
   const el = useRef(null);
   useEffect(() => {
     let alive = true, eng = null;
-    createMap(el.current, { scrollZoom: false, alive: () => alive }).then(async (m) => {
+    createMap(el.current, { ...look, scrollZoom: false, alive: () => alive }).then(async (m) => {
       if (!m) return;
       if (!alive) { m.destroy(); return; }
       eng = m;
-      try { const bd = await loadBoundary(); if (alive) m.focusPoblacion(bd.extent, bd.pob, { fit: false }); } catch { /* outline is optional */ }
+      try { const bd = await loadBoundary(look.boundaryUrl); if (alive) m.focusPoblacion(bd.extent, bd.pob, { fit: false }); } catch { /* outline is optional */ }
       if (!alive) return;
       m.marker(m.group(), [lat, lng], { html: '<div class="fb-pin" style="width:18px;height:18px;background:#c2412d"></div>', size: [18, 18], anchor: [9, 9], zIndex: 900 });
       m.setView(lat, lng, 17);
     });
     return () => { alive = false; eng?.destroy(); };
-  }, [lat, lng]);
+  }, [lat, lng, look]);
   return <div ref={el} className="map-canvas" style={{ minHeight: 200, height: 200, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--line)' }} aria-label="Location of the report" />;
 }
 
