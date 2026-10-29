@@ -1,0 +1,4 @@
+﻿supabase/.temp/
+**/supabase/.temp/
+**/node_modules/
+**/.env

@@ -120,7 +120,7 @@ export default function Layout({ role }) {
   const ctx = useMemo(() => ({ role, setTitle, setLive, refreshBadges, me }), [role, refreshBadges, me]);
   if (!me) return null;
   const name = me.name || auth.email;
-  const logo = role === 'lgu' ? '/images/lgu_iligan.jpg' : '/images/poblogo.png';
+  const logo = role === 'lgu' ? '/images/icenro.jpg' : '/images/poblogo.png';
   const sub = role === 'lgu' ? 'Iligan City LGU monitoring' : 'Barangay Poblacion operations';
 
   return (

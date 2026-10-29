@@ -359,7 +359,7 @@ export default function Landing() {
               <div className="hero-meta">
                 <span className="seals">
                   <img src="/images/iligan.jpg" alt="City of Iligan seal" />
-                  <img src="/images/lgu_iligan.jpg" alt="LGU Iligan seal" />
+                  <img src="/images/icenro.jpg" alt="LGU Iligan seal" />
                   <img src="/images/poblogo.png" alt="Barangay Poblacion seal" />
                 </span>
                 <p>For the 10 zones of Barangay Poblacion, Iligan City.</p>

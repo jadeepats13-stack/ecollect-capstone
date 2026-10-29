@@ -48,14 +48,22 @@ async function findUserByEmail(admin: SupabaseClient, email: string) {
   return null;
 }
 
-/** Is this login still used by any role row? */
-async function loginInUse(admin: SupabaseClient, uid: string) {
+/** Is this login still used by any role row (optionally ignoring one role table)? */
+async function loginInUse(admin: SupabaseClient, uid: string, exceptTable?: string) {
   for (const t of ROLE_TABLES) {
-    const { count } = await admin.from(t).select('*', { count: 'exact', head: true }).eq('auth_user_id', uid);
+    if (t === exceptTable) continue;
+    const { count, error } = await admin.from(t).select('*', { count: 'exact', head: true }).eq('auth_user_id', uid);
+    if (error) throw error;   // never treat "could not check" as "not in use"
     if (count) return true;
   }
   return false;
 }
+
+// A linked login (same email, several roles) may belong to someone with more rights, e.g. the LGU Admin.
+// Only its owner may change its password or email; otherwise a manager could take that login over.
+const SHARED_LOGIN = 'This login is also used by another ECollect account, so only its owner can change its password or email.';
+const mayChangeLogin = async (admin: SupabaseClient, callerId: string, uid: string, table: string) =>
+  uid === callerId || !(await loginInUse(admin, uid, table));
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -149,8 +157,11 @@ Deno.serve(async (req) => {
       if (password && password.length < 8) return fail(400, 'A new password must be at least 8 characters.');
       const values: Record<string, unknown> = { [cfg.first]: first, [cfg.last]: last };
       for (const k of cfg.extras) if (k in body) values[k] = intOrNull(body[k]);
+      const emailChanged = email !== String(target.email ?? '').toLowerCase();
+      if ((password || emailChanged) && target.auth_user_id
+          && !(await mayChangeLogin(admin, user.id, target.auth_user_id, cfg.table))) return fail(403, SHARED_LOGIN);
 
-      if (email !== String(target.email ?? '').toLowerCase()) {
+      if (emailChanged) {
         const { data: clash } = await admin.from(cfg.table).select(cfg.id).ilike('email', likeExact(email)).neq(cfg.id, id).maybeSingle();
         if (clash) return fail(409, 'Another account of this type already uses that email.');
         if (target.auth_user_id) {
@@ -174,6 +185,7 @@ Deno.serve(async (req) => {
       const password = String(body.password ?? '');
       if (password.length < 8) return fail(400, 'The password must be at least 8 characters.');
       if (!target.auth_user_id) return fail(400, 'This person has no login yet. Use "Create login" instead.');
+      if (!(await mayChangeLogin(admin, user.id, target.auth_user_id, cfg.table))) return fail(403, SHARED_LOGIN);
       const { error } = await admin.auth.admin.updateUserById(target.auth_user_id, { password });
       if (error) return fail(400, error.message);
       return json({ ok: true });

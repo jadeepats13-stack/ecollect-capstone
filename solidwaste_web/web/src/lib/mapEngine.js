@@ -18,16 +18,16 @@ import { color } from './ui';
 export const GOOGLE_KEY = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '').trim();
 
 /**
- * How the maps look for each role. Barangay Admin: satellite only (no Satellite/Street switch), no +/- buttons
+ * How the maps look on the admin website (Barangay Admin and LGU Admin): satellite only (no Satellite/Street switch), no +/- buttons
  * (scroll, pinch or double-click to zoom), the map credits folded into a small "i", the boundary the barangay
- * traced, and no on/off switch for that boundary. Other roles keep the default look.
+ * traced, and no on/off switch for that boundary. Anything else keeps the default look.
  */
-const BARANGAY_LOOK = {
+const ADMIN_LOOK = {
   satelliteOnly: true, zoomButtons: false, compactCredit: true, boundaryToggle: false,
   boundaryUrl: '/data/poblacion_boundary_traced.geojson', credit: 'Boundary: Barangay Poblacion (traced 2026)',
 };
 const DEFAULT_LOOK = Object.freeze({});
-export const mapLook = (role) => (role === 'barangay' ? BARANGAY_LOOK : DEFAULT_LOOK);
+export const mapLook = (role) => (role === 'barangay' || role === 'lgu' ? ADMIN_LOOK : DEFAULT_LOOK);
 
 // ---------- Google Maps loader ----------
 let googlePromise = null;
